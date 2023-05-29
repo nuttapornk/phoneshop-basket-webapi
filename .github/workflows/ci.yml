@@ -1,0 +1,33 @@
+name: build
+
+on:
+  push:  
+    branches: [dev]
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    steps:
+    -
+      name: chekcout
+      uses: actions/checkout@v2
+    - 
+       name: Login Docker Hub
+       uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
+       with:
+         username: ${{ secrets.DOCKER_HUB_USERNAME }}
+         password: ${{ secrets.DOCKER_HUB_TOKEN }}
+    - 
+       name: Setup docker buildx
+       id: buildx
+       uses: docker/setup-buildx-action@v2
+    -
+       name: Build and push
+       id: docker_build
+       uses: docker/build-push-action@v2
+       with:         
+         push: true
+         context: .
+         file: ./Dockerfile
+         tags: ${{ secrets.DOCKER_HUB_USERNAME }}/${{ github.event.repository.name }}:latest
+         labels: ${{ steps.meta.outputs.labels }}
